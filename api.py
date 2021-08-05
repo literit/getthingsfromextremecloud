@@ -5,7 +5,7 @@ from tabulate import tabulate
 from secret import *
 #The variable pwd requires a seperate file named secret.py with the variable pwd = {'username': 'insert username here', 'password': 'insert password here'}
 
-LIMIT_OF_DATA_SENT = '2'
+LIMIT_OF_DATA_SENT = '100'
 
 #Login to api
 login = requests.post("https://api.extremecloudiq.com/login", json=pwd)
