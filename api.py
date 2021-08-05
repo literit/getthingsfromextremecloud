@@ -5,6 +5,8 @@ from tabulate import tabulate
 from secret import *
 #The variable pwd requires a seperate file named secret.py with the variable pwd = {'username': 'insert username here', 'password': 'insert password here'}
 
+LIMIT_OF_DATA_SENT = '2'
+
 #Login to api
 login = requests.post("https://api.extremecloudiq.com/login", json=pwd)
 
@@ -14,12 +16,14 @@ authkey = {}
 authkey["Authorization"] = "Bearer " + login_text["access_token"]
 
 #Gets list of devices and their data
-devices = requests.get("https://api.extremecloudiq.com/devices?page=1&limit=100", headers = authkey)
+devices = requests.get("https://api.extremecloudiq.com/devices?page=1&limit=" + LIMIT_OF_DATA_SENT, headers = authkey)
 
-#Creates a translation table for device IDs to actual Device
+#Bypasses pagination of the device list, also creates a translation table for device IDs to actual device data
 id2device = {}
-for device in devices.json()['data']:
-    id2device[device['id']] = device
+for i in range(devices.json()['total_pages']):
+    currentdevices = requests.get("https://api.extremecloudiq.com/devices?page=" + str(i + 1) +"&limit=" + LIMIT_OF_DATA_SENT, headers = authkey)
+    for device in currentdevices.json()['data']:
+        id2device[device['id']] = device
 
 #Gets list of clients and their data
 clients = requests.get("https://api.extremecloudiq.com/clients/active", headers = authkey)
