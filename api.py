@@ -3,7 +3,7 @@ import json
 from pprint import pprint as pp
 from tabulate import tabulate
 from secret import *
-#the variable pwd requires a seperate file named secret.py with the variable pwd = {'username': 'insert username here', 'password': 'insert password here'} with the two fields being filed in
+#The variable pwd requires a seperate file named secret.py with the variable pwd = {'username': 'insert username here', 'password': 'insert password here'}
 
 #Login to api
 login = requests.post("https://api.extremecloudiq.com/login", json=pwd)
