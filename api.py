@@ -5,7 +5,6 @@ from tabulate import tabulate
 import sys
 from secret import *
 #The variable pwd requires a seperate file named secret.py with the variable pwd = {'username': 'insert username here', 'password': 'insert password here'}
-
 LIMIT_OF_DATA_SENT = '100'
 if sys.argv[1] == 'list' and len(sys.argv) > 2:
     print('Too Many Arguments')
@@ -41,20 +40,43 @@ for client in clients.json()['data']:
     clientlist.append([client['id'], client['hostname'], client['ip_address'], client['mac_address'], client['ssid'], client['device_id'], id2device[client['device_id']]['hostname'], id2device[client['device_id']]['ip_address']])
 if sys.argv[1] == "list":
     print(tabulate(clientlist, headers=['CL_ID', 'CL_Name', 'CL_IP', 'CL_MAC', 'CL_SSID', 'Dev_ID', 'Dev_Name', 'Dev_IP']))
+
 clijson = {"devices" : { "ids" : [] }, "clis" : []}
-for key in id2device:
-    clijson["devices"]["ids"].append(key)
+for jad in id2device:
+    clijson["devices"]["ids"].append(jad)
+
+# Listbans via console command that is sent to all devices
+
 if sys.argv[1] == "listban":
     clijson["clis"].append("show security mac-filter " + sys.argv[2])
     macfilter = requests.post("https://api.extremecloudiq.com/devices/:cli", json=clijson, headers=authkey)
     for cli_id in macfilter.json()["device_cli_outputs"]:
         for device_out in macfilter.json()["device_cli_outputs"][cli_id]:
             print(device_out["output"])
+
+# Bans a device by getting the id from the details in the client
+
 if sys.argv[1] == "ban":
     clijson['clis'].append('security mac-filter ' + sys.argv[2] + ' address ' + sys.argv[3] + ' deny')
+    banlist = []
+    for client in clients.json()['data']:
+        if client['mac_address'] == sys.argv[3].upper():
+            banlist.append(client['device_id'])
+    clijson['devices']['ids'] = banlist
     ban = requests.post("https://api.extremecloudiq.com/devices/:cli", json=clijson, headers=authkey) 
     pp(ban.json())
+
+# Unbans a client by getting the device id from an argument in the command
+
 if sys.argv[1] == 'unban':
     clijson['clis'].append('security mac-filter ' + sys.argv[2] + ' address ' + sys.argv[3] + ' permit')
+    clijson['devices']['ids'] = [sys.argv[4]]
     unban = requests.post("https://api.extremecloudiq.com/devices/:cli", json=clijson, headers=authkey)
     pp(unban.json())
+
+
+
+# TODO 
+# 1. make listban get list only from devices connected to specific WiFi
+# 2. add argparse to make the command cleaner
+# 3. parse output to make that cleaner too
